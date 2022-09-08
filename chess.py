@@ -5,7 +5,6 @@ import engine
 WIDTH = HEIGHT = 512
 DIMENSION = 8
 SQ_SIZE = WIDTH // DIMENSION
-print(SQ_SIZE)
 FPS = 15
 IMAGES = {}
 
@@ -50,6 +49,8 @@ def main():
     pg.display.set_caption('Chess')
     gameBoard.fill(pg.Color("white"))
     gs = engine.GameState()
+    valid_moves = gs.getAllValidMoves()
+    move_made = False
 
     loadImages()
     running = True
@@ -59,6 +60,8 @@ def main():
         for e in pg.event.get():
             if e.type == pg.QUIT:
                 running = False
+            
+            # for mouse stuff
             elif e.type == pg.MOUSEBUTTONDOWN:
                 location = pg.mouse.get_pos()
                 col, row = location[0] // SQ_SIZE, location[1] // SQ_SIZE 
@@ -72,10 +75,22 @@ def main():
                 if len(selection_hist) == 2:
                     move = engine.Move(gs.board, selection_hist[0], selection_hist[1])
                     print(move.getNotation())
-                    gs.makeMove(move)
+                    if move in valid_moves:
+                        gs.makeMove(move)
+                        move_made = True
                     sq_selected = ()
                     selection_hist = []
 
+            # for keyboard stuff
+            elif e.type == pg.KEYDOWN:
+                #undo when z is pressed
+                if e.key == pg.K_z:
+                    gs.undoMove()
+                    move_made = True
+
+        if move_made:
+            valid_moves = gs.getAllValidMoves()
+            move_made = False
 
         drawGameState(gameBoard, gs)
         clock.tick(FPS)

@@ -1,3 +1,4 @@
+from shutil import move
 import numpy as np
 
 class GameState():
@@ -22,7 +23,63 @@ class GameState():
         self.move_log.append(move)
         self.white_to_move = not self.white_to_move
 
+    def undoMove(self):
+        if len(self.move_log) != 0:
+            move = self.move_log.pop()
+            self.board[move.start_sq_row][move.start_sq_col] = move.piece_moved
+            self.board[move.end_sq_row][move.end_sq_col] = move.piece_took
+            self.white_to_move = not self.white_to_move
 
+    # get all possible pawn moves
+    def getPawnMoves(self, r, c, moves):
+        pass
+
+    # get all possible rook moves
+    def getRookMoves(self, r, c, moves):
+        pass
+
+    # get all possible knight moves
+    def getKnightMoves(self, r, c, moves):
+        pass
+
+    # get all possible bishop moves
+    def getBishopMoves(self, r, c, moves):
+        pass
+
+    # get all possible queen moves
+    def getQueenMoves(self, r, c, moves):
+        pass
+
+    # get all possible king moves
+    def getKingMoves(self, r, c, moves):
+        pass
+
+    # get all possible moves not considering checks after that
+    def getAllPossibleMoves(self):
+        moves = []
+        for r in range(8):
+            for c in range(8):
+                turn = self.board[r][c][0]
+                if (turn == 'w' and self.white_to_move) and (turn == 'b' and not self.white_to_move):
+                    piece = self.board[r][c][1]
+                    if piece == 'P':
+                        self.getPawnMoves(r, c, moves)
+                    elif piece == 'R':
+                        self.getRookMoves(r, c, moves)
+                    elif piece == 'N':
+                        self.getKnightMoves(r, c, moves)
+                    elif piece == 'B':
+                        self.getBishopMoves(r, c, moves)
+                    elif piece == 'Q':
+                        self.getQueenMoves(r, c, moves)
+                    elif piece == 'K':
+                        self.getKingMoves(r, c, moves)
+        return moves
+        
+
+    # get all valid moves from all possible moves
+    def getAllValidMoves(self):
+        return self.getAllPossibleMoves();       
 
 class Move():
     # mapping rows and cols
@@ -38,6 +95,13 @@ class Move():
         self.end_sq_col = end_sq[1]
         self.piece_moved = board[self.start_sq_row][self.start_sq_col]
         self.piece_took = board[self.end_sq_row][self.end_sq_col]
+        self.move_ID = self.start_sq_row*1000 + self.start_sq_col*100 + self.end_sq_row*10 + self.end_sq_col
+
+    # overriding the equals method
+    def __eq__(self, other):
+        if isinstance(other, Move):
+            return self.move_ID == other.move_ID
+        return False
 
     def getNotation(self):
         return self.cols_to_files[self.start_sq_col] + self.rows_to_ranks[self.start_sq_row] + self.cols_to_files[self.end_sq_col] + self.rows_to_ranks[self.end_sq_row]
