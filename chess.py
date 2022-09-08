@@ -1,3 +1,4 @@
+from numpy import rec
 import pygame as pg
 import engine
 
@@ -52,10 +53,31 @@ def main():
 
     loadImages()
     running = True
+    sq_selected = () # tuple for selected square
+    selection_hist = [] # list of 2 tuples for last 2 selections
     while running:
         for e in pg.event.get():
             if e.type == pg.QUIT:
                 running = False
+            elif e.type == pg.MOUSEBUTTONDOWN:
+                location = pg.mouse.get_pos()
+                col, row = location[0] // SQ_SIZE, location[1] // SQ_SIZE 
+                if sq_selected == (row, col): # same square selected again
+                    sq_selected = () # deselect square
+                    selection_hist = [] # clear history
+                else:
+                    sq_selected = (row, col)
+                    selection_hist.append(sq_selected)
+                
+                if len(selection_hist) == 2:
+                    piece = gs.board[selection_hist[0][0]][selection_hist[0][1]]
+                    if piece != "--":
+                        gs.board[selection_hist[0][0]][selection_hist[0][1]] = "--"
+                        gs.board[selection_hist[1][0]][selection_hist[1][1]] = piece
+                    sq_selected = ()
+                    selection_hist = []
+
+
         drawGameState(gameBoard, gs)
         clock.tick(FPS)
         pg.display.flip()
