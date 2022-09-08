@@ -70,10 +70,9 @@ def main():
                     selection_hist.append(sq_selected)
                 
                 if len(selection_hist) == 2:
-                    piece = gs.board[selection_hist[0][0]][selection_hist[0][1]]
-                    if piece != "--":
-                        gs.board[selection_hist[0][0]][selection_hist[0][1]] = "--"
-                        gs.board[selection_hist[1][0]][selection_hist[1][1]] = piece
+                    move = engine.Move(gs.board, selection_hist[0], selection_hist[1])
+                    print(move.getNotation())
+                    gs.makeMove(move)
                     sq_selected = ()
                     selection_hist = []
 
