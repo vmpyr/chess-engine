@@ -1,4 +1,3 @@
-from numpy import rec
 import pygame as pg
 import engine
 

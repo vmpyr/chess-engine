@@ -1,4 +1,5 @@
 from shutil import move
+from turtle import pos
 import numpy as np
 
 class GameState():
@@ -16,6 +17,8 @@ class GameState():
 
         self.white_to_move = True
         self.move_log = []
+        self.move_funcs = {'P': self.getPawnMoves, 'R': self.getRookMoves, 'N': self.getKnightMoves,
+                           'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves}
 
     def makeMove(self, move):
         self.board[move.start_sq_row][move.start_sq_col] = "--"
@@ -32,27 +35,92 @@ class GameState():
 
     # get all possible pawn moves
     def getPawnMoves(self, r, c, moves):
-        pass
+        if self.white_to_move:
+            if self.board[r-1][c] == "--":
+                moves.append(Move(self.board, (r, c), (r-1, c)))
+                #checking for 2 square moves
+                if r == 6 and self.board[r-2][c] == "--":
+                    moves.append(Move(self.board, (r, c), (r-2, c)))
+            if c-1 >= 0: #ensure we don't go out of the board to left
+                if self.board[r-1][c-1][0] == 'b':
+                    moves.append(Move(self.board, (r, c), (r-1, c-1)))
+            if c+1 <= 7: #ensure we don't go out of the board to right
+                if self.board[r-1][c+1][0] == 'b':
+                    moves.append(Move(self.board, (r, c), (r-1, c+1)))
+        else:
+            if self.board[r+1][c] == "--":
+                moves.append(Move(self.board, (r, c), (r+1, c)))
+                #checking for 2 square moves
+                if r == 1 and self.board[r+2][c] == "--":
+                    moves.append(Move(self.board, (r, c), (r+2, c)))
+            if c-1 >= 0: #ensure we don't go out of the board to left
+                if self.board[r-1][c-1][0] == 'w':
+                    moves.append(Move(self.board, (r, c), (r+1, c-1)))
+            if c+1 <= 7: #ensure we don't go out of the board to right
+                if self.board[r-1][c+1][0] == 'w':
+                    moves.append(Move(self.board, (r, c), (r+1, c+1)))        
+
 
     # get all possible rook moves
     def getRookMoves(self, r, c, moves):
-        pass
+        directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
+        can_be_caputured = 'b' if self.white_to_move else 'w'
+        for d in directions:
+            for i in range(1, 8):
+                end_row, end_col = r + d[0] * i, c + d[1] * i
+                if 0 <= end_row < 8 and 0 <= end_col < 8:
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--":
+                        moves.append(Move(self.board, (r, c), (end_row, end_col)))
+                    elif end_piece[0] == can_be_caputured:
+                        moves.append(Move(self.board, (r, c), (end_row, end_col)))
+                        break
+                    else: break
+                else: break
 
     # get all possible knight moves
     def getKnightMoves(self, r, c, moves):
-        pass
+        possibilities = ((2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2))
+        same_color = 'w' if self.white_to_move else 'b'
+        for p in possibilities:
+            end_row, end_col = r + p[0], c + p[1]
+            if 0 <= end_row < 8 and 0 <= end_col < 8:
+                end_piece = self.board[end_row][end_col]
+                if end_piece[0] != same_color:
+                    moves.append(Move(self.board, (r, c), (end_row, end_col)))
 
     # get all possible bishop moves
     def getBishopMoves(self, r, c, moves):
-        pass
+        directions = ((-1, -1), (1, 1), (1, -1), (-1, 1))
+        can_be_caputured = 'b' if self.white_to_move else 'w'
+        for d in directions:
+            for i in range(1, 8):
+                end_row, end_col = r + d[0] * i, c + d[1] * i
+                if 0 <= end_row < 8 and 0 <= end_col < 8:
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--":
+                        moves.append(Move(self.board, (r, c), (end_row, end_col)))
+                    elif end_piece[0] == can_be_caputured:
+                        moves.append(Move(self.board, (r, c), (end_row, end_col)))
+                        break
+                    else: break
+                else: break
 
     # get all possible queen moves
     def getQueenMoves(self, r, c, moves):
-        pass
+        self.getRookMoves(r, c, moves)
+        self.getBishopMoves(r, c, moves)
 
     # get all possible king moves
     def getKingMoves(self, r, c, moves):
-        pass
+        possibilities = ((1, 1), (1, -1), (-1, 1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1))
+        same_color = 'w' if self.white_to_move else 'b'
+        for i in range(8):
+            end_row, end_col = r + possibilities[i][0], c + possibilities[i][1]
+            if 0 <= end_row < 8 and 0 <= end_col < 8:
+                end_piece = self.board[end_row][end_col]
+                if end_piece[0] != same_color:
+                    moves.append(Move(self.board, (r, c), (end_row, end_col)))
 
     # get all possible moves not considering checks after that
     def getAllPossibleMoves(self):
@@ -60,20 +128,9 @@ class GameState():
         for r in range(8):
             for c in range(8):
                 turn = self.board[r][c][0]
-                if (turn == 'w' and self.white_to_move) and (turn == 'b' and not self.white_to_move):
+                if (turn == 'w' and self.white_to_move) or (turn == 'b' and not self.white_to_move):
                     piece = self.board[r][c][1]
-                    if piece == 'P':
-                        self.getPawnMoves(r, c, moves)
-                    elif piece == 'R':
-                        self.getRookMoves(r, c, moves)
-                    elif piece == 'N':
-                        self.getKnightMoves(r, c, moves)
-                    elif piece == 'B':
-                        self.getBishopMoves(r, c, moves)
-                    elif piece == 'Q':
-                        self.getQueenMoves(r, c, moves)
-                    elif piece == 'K':
-                        self.getKingMoves(r, c, moves)
+                    self.move_funcs[piece](r, c, moves)
         return moves
         
 
