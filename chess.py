@@ -77,8 +77,10 @@ def main():
                     if move in valid_moves:
                         gs.makeMove(move)
                         move_made = True
-                    sq_selected = ()
-                    selection_hist = []
+                        sq_selected = ()
+                        selection_hist = []
+                    else:
+                        selection_hist = [sq_selected]
 
             # for keyboard stuff
             elif e.type == pg.KEYDOWN:
