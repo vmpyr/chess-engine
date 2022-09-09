@@ -1,7 +1,7 @@
 import pygame as pg
 import engine
 
-WIDTH = HEIGHT = 512
+WIDTH = HEIGHT = 960
 DIMENSION = 8
 SQ_SIZE = WIDTH // DIMENSION
 FPS = 15
