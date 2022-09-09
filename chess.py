@@ -73,8 +73,8 @@ def main():
                 
                 if len(selection_hist) == 2:
                     move = engine.Move(gs.board, selection_hist[0], selection_hist[1])
-                    print(move.getNotation())
                     if move in valid_moves:
+                        print(move.getNotation())
                         gs.makeMove(move)
                         move_made = True
                         sq_selected = ()
